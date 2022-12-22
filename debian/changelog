@@ -1,0 +1,165 @@
+python-attrs (20.3.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Revert theme.
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Tue, 10 Nov 2020 10:38:37 +0200
+
+python-attrs (20.1.0-1) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/control: Update Maintainer field with new Debian Python Team
+    contact address.
+  * d/control: Update Vcs-* fields with new Debian Python Team Salsa
+    layout.
+
+  [ Tristan Seligmann ]
+  * New upstream release.
+  * Depend on python3-sphinx-rtd-theme.
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Mon, 02 Nov 2020 09:38:26 +0200
+
+python-attrs (19.3.0-5) unstable; urgency=medium
+
+  * Team upload.
+  * Drop PyPy support.
+  * Bump debhelper compat level to 13.
+  * Fix doc-base and add docs links.
+
+ -- Ondřej Nový <onovy@debian.org>  Fri, 05 Jun 2020 16:22:24 +0200
+
+python-attrs (19.3.0-4) unstable; urgency=medium
+
+  * Drop python2 support; Closes: #937587
+
+ -- Sandro Tosi <morph@debian.org>  Thu, 23 Apr 2020 01:15:28 -0400
+
+python-attrs (19.3.0-3) unstable; urgency=medium
+
+  * Dont run unittests for python2 binary, to reduce pytest rdeps
+
+ -- Sandro Tosi <morph@debian.org>  Mon, 13 Apr 2020 19:17:19 -0400
+
+python-attrs (19.3.0-2) unstable; urgency=medium
+
+  [ Emmanuel Arias ]
+  * Team Upload.
+  * d/tests/control: Fix autopkgtest. Use py3versions -s to use all
+    supported py3 versions.
+  * Bump Standards-Version to 4.5.0.
+  * d/gbp.conf: Set debian/master as default branch according to DEP-14.
+  * d/salsa-ci.yml: enable salsa-ci.
+
+ -- Emmanuel Arias <eamanu@yaerobi.com>  Fri, 20 Mar 2020 13:23:32 -0400
+
+python-attrs (19.3.0-1) unstable; urgency=medium
+
+  [ Adam Cecile ]
+  * New upstream release.
+  * Update intersphinx mapping patch to prepare to support zope.interface
+    (but this package does not build sphinx doc yet).
+  * Fix typo in debian/control.
+  * Improve clean target to be able to build twice in a row.
+
+  [ Ondřej Nový ]
+  * Use debhelper-compat instead of debian/compat.
+
+  [ Debian Janitor ]
+  * Set upstream metadata fields: Bug-Database, Repository, Repository-
+    Browse.
+  * Set upstream metadata fields: Bug-Submit.
+
+  [ Sandro Tosi ]
+  * debian/control
+    - remove python-sphinx-rtd-theme, no longer needed since attrs/17.1.0
+      https://github.com/python-attrs/attrs/commit/0563f44b477666143fb81e9c3822de1f87b9a8c5 ;
+      Closes: #950449
+
+ -- Sandro Tosi <morph@debian.org>  Sat, 01 Feb 2020 17:46:43 -0500
+
+python-attrs (18.2.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release (Closes: #901013)
+  * Mark python-attr-doc Multi-Arch: foreign
+  * After this rebuild the changelog is fully present (Closes: #897408)
+  * Bump Standards-Version to 4.1.3
+  * set Rules-Requires-Root to no
+
+  [ Ondřej Nový ]
+  * d/tests: Use AUTOPKGTEST_TMP instead of ADTTMP
+  * Convert git repository from git-dpm to gbp layout
+  * Use 'python3 -m sphinx' instead of sphinx-build for building docs
+
+ -- Salvo 'LtWorf' Tomaselli <tiposchi@tiscali.it>  Wed, 10 Oct 2018 11:51:14 +0200
+
+python-attrs (17.4.0-2) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/control: Set Vcs-* to salsa.debian.org
+
+  [ Piotr Ożarowski ]
+  * use pybuild --print build_dir istead of patching docs/conf.py
+    (requires dh-python >= 3.20180313)
+  * do not ship conftest.py (used only during tests)
+
+ -- Piotr Ożarowski <piotr@debian.org>  Wed, 14 Mar 2018 11:57:11 +0100
+
+python-attrs (17.4.0-1) unstable; urgency=medium
+
+  * New upstream release (closes: #887508).
+  * Use https for copyright format.
+  * Bump debhelper compat level to 11.
+  * Bump Standards-Version to 4.1.3 (no changes).
+  * Replace extra priority with optional.
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Tue, 23 Jan 2018 14:03:51 +0200
+
+python-attrs (17.2.0-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Add build-dependency on six.
+    - Link to local copy of attrs logo from changelog.
+  * Use a more reliable method for adding the build path to sys.path for
+    autodoc.
+  * Bump Standards-Version to 4.0.0 (no changes).
+  * Update repository location in debian/watch.
+  * Add DEP-8 tests.
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Fri, 30 Jun 2017 03:43:49 +0200
+
+python-attrs (16.3.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Mon, 12 Dec 2016 02:49:57 +0200
+
+python-attrs (16.2.0-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Doc build is now reproducible (closes: #833886).
+  * Fix API documentation build, and use the local copy of the Python
+    documentation (closes: #834639).
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Mon, 10 Oct 2016 01:09:18 +0200
+
+python-attrs (16.0.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Install doc-base entry.
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Thu, 23 Jun 2016 19:50:19 +0200
+
+python-attrs (15.2.0-2) unstable; urgency=medium
+
+  * Fix debian/watch.
+  * Add python-attr-doc to Suggests: (closes: #816577).
+  * Bump Standards-Version to 3.9.8 (no changes).
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Wed, 27 Apr 2016 21:51:33 +0200
+
+python-attrs (15.2.0-1) unstable; urgency=low
+
+  * Initial upload (closes: #815387).
+
+ -- Tristan Seligmann <mithrandi@debian.org>  Sun, 21 Feb 2016 08:22:06 +0200
