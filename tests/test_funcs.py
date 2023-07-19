@@ -1,10 +1,12 @@
+# SPDX-License-Identifier: MIT
+
 """
 Tests for `attr._funcs`.
 """
 
-from __future__ import absolute_import, division, print_function
 
 from collections import OrderedDict
+from typing import Generic, TypeVar
 
 import pytest
 
@@ -14,7 +16,7 @@ from hypothesis import strategies as st
 import attr
 
 from attr import asdict, assoc, astuple, evolve, fields, has
-from attr._compat import TYPE, Mapping, Sequence, ordered_dict
+from attr._compat import Mapping, Sequence
 from attr.exceptions import AttrsAttributeNotFoundError
 from attr.validators import instance_of
 
@@ -26,21 +28,21 @@ SEQUENCE_TYPES = (list, tuple)
 
 
 @pytest.fixture(scope="session", name="C")
-def fixture_C():
+def _C():
     """
     Return a simple but fully featured attrs class with an x and a y attribute.
     """
     import attr
 
     @attr.s
-    class C(object):
+    class C:
         x = attr.ib()
         y = attr.ib()
 
     return C
 
 
-class TestAsDict(object):
+class TestAsDict:
     """
     Tests for `asdict`.
     """
@@ -195,12 +197,43 @@ class TestAsDict(object):
         Field order should be preserved when dumping to an ordered_dict.
         """
         instance = cls()
-        dict_instance = asdict(instance, dict_factory=ordered_dict)
+        dict_instance = asdict(instance, dict_factory=dict)
 
         assert [a.name for a in fields(cls)] == list(dict_instance.keys())
 
+    def test_retain_keys_are_tuples(self):
+        """
+        retain_collect_types also retains keys.
+        """
 
-class TestAsTuple(object):
+        @attr.s
+        class A:
+            a = attr.ib()
+
+        instance = A({(1,): 1})
+
+        assert {"a": {(1,): 1}} == attr.asdict(
+            instance, retain_collection_types=True
+        )
+
+    def test_tuple_keys(self):
+        """
+        If a key is collection type, retain_collection_types is False,
+         the key is serialized as a tuple.
+
+        See #646
+        """
+
+        @attr.s
+        class A:
+            a = attr.ib()
+
+        instance = A({(1,): 1})
+
+        assert {"a": {(1,): 1}} == attr.asdict(instance)
+
+
+class TestAsTuple:
     """
     Tests for `astuple`.
     """
@@ -358,7 +391,7 @@ class TestAsTuple(object):
         assert (1, [1, 2, 3]) == d
 
 
-class TestHas(object):
+class TestHas:
     """
     Tests for `has`.
     """
@@ -375,7 +408,7 @@ class TestHas(object):
         """
 
         @attr.s
-        class D(object):
+        class D:
             pass
 
         assert has(D)
@@ -386,8 +419,39 @@ class TestHas(object):
         """
         assert not has(object)
 
+    def test_generics(self):
+        """
+        Works with generic classes.
+        """
+        T = TypeVar("T")
 
-class TestAssoc(object):
+        @attr.define
+        class A(Generic[T]):
+            a: T
+
+        assert has(A)
+
+        assert has(A[str])
+        # Verify twice, since there's caching going on.
+        assert has(A[str])
+
+    def test_generics_negative(self):
+        """
+        Returns `False` on non-decorated generic classes.
+        """
+        T = TypeVar("T")
+
+        class A(Generic[T]):
+            a: T
+
+        assert not has(A)
+
+        assert not has(A[str])
+        # Verify twice, since there's caching going on.
+        assert not has(A[str])
+
+
+class TestAssoc:
     """
     Tests for `assoc`.
     """
@@ -399,12 +463,11 @@ class TestAssoc(object):
         """
 
         @attr.s(slots=slots, frozen=frozen)
-        class C(object):
+        class C:
             pass
 
         i1 = C()
-        with pytest.deprecated_call():
-            i2 = assoc(i1)
+        i2 = assoc(i1)
 
         assert i1 is not i2
         assert i1 == i2
@@ -415,8 +478,7 @@ class TestAssoc(object):
         No changes means a verbatim copy.
         """
         i1 = C()
-        with pytest.deprecated_call():
-            i2 = assoc(i1)
+        i2 = assoc(i1)
 
         assert i1 is not i2
         assert i1 == i2
@@ -433,8 +495,7 @@ class TestAssoc(object):
         chosen_names = data.draw(st.sets(st.sampled_from(field_names)))
         change_dict = {name: data.draw(st.integers()) for name in chosen_names}
 
-        with pytest.deprecated_call():
-            changed = assoc(original, **change_dict)
+        changed = assoc(original, **change_dict)
 
         for k, v in change_dict.items():
             assert getattr(changed, k) == v
@@ -451,9 +512,7 @@ class TestAssoc(object):
         ) as e, pytest.deprecated_call():
             assoc(C(), aaaa=2)
 
-        assert (
-            "aaaa is not an attrs attribute on {cls!r}.".format(cls=C),
-        ) == e.value.args
+        assert (f"aaaa is not an attrs attribute on {C!r}.",) == e.value.args
 
     def test_frozen(self):
         """
@@ -461,29 +520,14 @@ class TestAssoc(object):
         """
 
         @attr.s(frozen=True)
-        class C(object):
+        class C:
             x = attr.ib()
             y = attr.ib()
 
-        with pytest.deprecated_call():
-            assert C(3, 2) == assoc(C(1, 2), x=3)
-
-    def test_warning(self):
-        """
-        DeprecationWarning points to the correct file.
-        """
-
-        @attr.s
-        class C(object):
-            x = attr.ib()
-
-        with pytest.warns(DeprecationWarning) as wi:
-            assert C(2) == assoc(C(1), x=2)
-
-        assert __file__ == wi.list[0].filename
+        assert C(3, 2) == assoc(C(1, 2), x=3)
 
 
-class TestEvolve(object):
+class TestEvolve:
     """
     Tests for `evolve`.
     """
@@ -495,7 +539,7 @@ class TestEvolve(object):
         """
 
         @attr.s(slots=slots, frozen=frozen)
-        class C(object):
+        class C:
             pass
 
         i1 = C()
@@ -544,8 +588,15 @@ class TestEvolve(object):
         # No generated class will have a four letter attribute.
         with pytest.raises(TypeError) as e:
             evolve(C(), aaaa=2)
-        expected = "__init__() got an unexpected keyword argument 'aaaa'"
-        assert (expected,) == e.value.args
+
+        if hasattr(C, "__attrs_init__"):
+            expected = (
+                "__attrs_init__() got an unexpected keyword argument 'aaaa'"
+            )
+        else:
+            expected = "__init__() got an unexpected keyword argument 'aaaa'"
+
+        assert e.value.args[0].endswith(expected)
 
     def test_validator_failure(self):
         """
@@ -553,14 +604,14 @@ class TestEvolve(object):
         """
 
         @attr.s
-        class C(object):
+        class C:
             a = attr.ib(validator=instance_of(int))
 
         with pytest.raises(TypeError) as e:
             evolve(C(a=1), a="some string")
         m = e.value.args[0]
 
-        assert m.startswith("'a' must be <{type} 'int'>".format(type=TYPE))
+        assert m.startswith("'a' must be <class 'int'>")
 
     def test_private(self):
         """
@@ -568,7 +619,7 @@ class TestEvolve(object):
         """
 
         @attr.s
-        class C(object):
+        class C:
             _a = attr.ib()
 
         assert evolve(C(1), a=2)._a == 2
@@ -585,8 +636,100 @@ class TestEvolve(object):
         """
 
         @attr.s
-        class C(object):
+        class C:
             a = attr.ib()
             b = attr.ib(init=False, default=0)
 
         assert evolve(C(1), a=2).a == 2
+
+    def test_regression_attrs_classes(self):
+        """
+        evolve() can evolve fields that are instances of attrs classes.
+
+        Regression test for #804
+        """
+
+        @attr.s
+        class Cls1:
+            param1 = attr.ib()
+
+        @attr.s
+        class Cls2:
+            param2 = attr.ib()
+
+        obj2a = Cls2(param2="a")
+        obj2b = Cls2(param2="b")
+
+        obj1a = Cls1(param1=obj2a)
+
+        assert Cls1(param1=Cls2(param2="b")) == attr.evolve(
+            obj1a, param1=obj2b
+        )
+
+    def test_dicts(self):
+        """
+        evolve() can replace an attrs class instance with a dict.
+
+        See #806
+        """
+
+        @attr.s
+        class Cls1:
+            param1 = attr.ib()
+
+        @attr.s
+        class Cls2:
+            param2 = attr.ib()
+
+        obj2a = Cls2(param2="a")
+        obj2b = {"foo": 42, "param2": 42}
+
+        obj1a = Cls1(param1=obj2a)
+
+        assert Cls1({"foo": 42, "param2": 42}) == attr.evolve(
+            obj1a, param1=obj2b
+        )
+
+    def test_inst_kw(self):
+        """
+        If `inst` is passed per kw argument, a warning is raised.
+        See #1109
+        """
+
+        @attr.s
+        class C:
+            pass
+
+        with pytest.warns(DeprecationWarning) as wi:
+            evolve(inst=C())
+
+        assert __file__ == wi.list[0].filename
+
+    def test_no_inst(self):
+        """
+        Missing inst argument raises a TypeError like Python would.
+        """
+        with pytest.raises(TypeError, match=r"evolve\(\) missing 1"):
+            evolve(x=1)
+
+    def test_too_many_pos_args(self):
+        """
+        More than one positional argument raises a TypeError like Python would.
+        """
+        with pytest.raises(
+            TypeError,
+            match=r"evolve\(\) takes 1 positional argument, but 2 were given",
+        ):
+            evolve(1, 2)
+
+    def test_can_change_inst(self):
+        """
+        If the instance is passed by positional argument, a field named `inst`
+        can be changed.
+        """
+
+        @attr.define
+        class C:
+            inst: int
+
+        assert C(42) == evolve(C(23), inst=42)
