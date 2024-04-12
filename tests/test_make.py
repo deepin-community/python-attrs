@@ -58,6 +58,19 @@ from .utils import simple_attr
 attrs_st = simple_attrs.map(lambda c: Attribute.from_counting_attr("name", c))
 
 
+@pytest.fixture(name="with_and_without_validation", params=[True, False])
+def _with_and_without_validation(request):
+    """
+    Run tests with and without validation enabled.
+    """
+    attr.validators.set_disabled(request.param)
+
+    try:
+        yield
+    finally:
+        attr.validators.set_disabled(False)
+
+
 class TestCountingAttr:
     """
     Tests for `attr`.
@@ -298,7 +311,7 @@ class TestTransformAttrs:
         b = attr.ib(default=2)
         a = attr.ib(default=1)
 
-        @attr.s(these=dict([("a", a), ("b", b)]))
+        @attr.s(these={"a": a, "b": b})
         class C:
             pass
 
@@ -518,7 +531,7 @@ class TestAttributes:
             assert meth is None
 
     @pytest.mark.parametrize(
-        "arg_name, method_name",
+        ("arg_name", "method_name"),
         [
             ("repr", "__repr__"),
             ("eq", "__eq__"),
@@ -612,12 +625,11 @@ class TestAttributes:
         assert C.D.__name__ == "D"
         assert C.D.__qualname__ == C.__qualname__ + ".D"
 
-    @pytest.mark.parametrize("with_validation", [True, False])
-    def test_pre_init(self, with_validation, monkeypatch):
+    @pytest.mark.usefixtures("with_and_without_validation")
+    def test_pre_init(self):
         """
         Verify that __attrs_pre_init__ gets called if defined.
         """
-        monkeypatch.setattr(_config, "_run_validators", with_validation)
 
         @attr.s
         class C:
@@ -628,12 +640,65 @@ class TestAttributes:
 
         assert 30 == getattr(c, "z", None)
 
-    @pytest.mark.parametrize("with_validation", [True, False])
-    def test_post_init(self, with_validation, monkeypatch):
+    @pytest.mark.usefixtures("with_and_without_validation")
+    def test_pre_init_args(self):
+        """
+        Verify that __attrs_pre_init__ gets called with extra args if defined.
+        """
+
+        @attr.s
+        class C:
+            x = attr.ib()
+
+            def __attrs_pre_init__(self2, x):
+                self2.z = x + 1
+
+        c = C(x=10)
+
+        assert 11 == getattr(c, "z", None)
+
+    @pytest.mark.usefixtures("with_and_without_validation")
+    def test_pre_init_kwargs(self):
+        """
+        Verify that __attrs_pre_init__ gets called with extra args and kwargs
+        if defined.
+        """
+
+        @attr.s
+        class C:
+            x = attr.ib()
+            y = attr.field(kw_only=True)
+
+            def __attrs_pre_init__(self2, x, y):
+                self2.z = x + y + 1
+
+        c = C(10, y=11)
+
+        assert 22 == getattr(c, "z", None)
+
+    @pytest.mark.usefixtures("with_and_without_validation")
+    def test_pre_init_kwargs_only(self):
+        """
+        Verify that __attrs_pre_init__ gets called with extra kwargs only if
+        defined.
+        """
+
+        @attr.s
+        class C:
+            y = attr.field(kw_only=True)
+
+            def __attrs_pre_init__(self2, y):
+                self2.z = y + 1
+
+        c = C(y=11)
+
+        assert 12 == getattr(c, "z", None)
+
+    @pytest.mark.usefixtures("with_and_without_validation")
+    def test_post_init(self):
         """
         Verify that __attrs_post_init__ gets called if defined.
         """
-        monkeypatch.setattr(_config, "_run_validators", with_validation)
 
         @attr.s
         class C:
@@ -647,12 +712,11 @@ class TestAttributes:
 
         assert 30 == getattr(c, "z", None)
 
-    @pytest.mark.parametrize("with_validation", [True, False])
-    def test_pre_post_init_order(self, with_validation, monkeypatch):
+    @pytest.mark.usefixtures("with_and_without_validation")
+    def test_pre_post_init_order(self):
         """
         Verify that __attrs_post_init__ gets called if defined.
         """
-        monkeypatch.setattr(_config, "_run_validators", with_validation)
 
         @attr.s
         class C:
@@ -1042,6 +1106,18 @@ class TestMakeClass:
         assert D in cls.__mro__
         assert isinstance(cls(), D)
 
+    def test_additional_class_body(self):
+        """
+        Additional class_body is added to newly created class.
+        """
+
+        def echo_func(cls, *args):
+            return args
+
+        cls = make_class("C", {}, class_body={"echo": classmethod(echo_func)})
+
+        assert ("a", "b") == cls.echo("a", "b")
+
     def test_clean_class(self, slots):
         """
         Attribute definitions do not appear on the class body.
@@ -1069,7 +1145,7 @@ class TestMakeClass:
         b = attr.ib(default=2)
         a = attr.ib(default=1)
 
-        C = attr.make_class("C", dict([("a", a), ("b", b)]))
+        C = attr.make_class("C", {"a": a, "b": b})
 
         assert "C(a=1, b=2)" == repr(C())
 
@@ -1200,7 +1276,7 @@ class TestFieldsDict:
 
         assert isinstance(d, dict)
         assert list(fields(C)) == list(d.values())
-        assert [a.name for a in fields(C)] == [field_name for field_name in d]
+        assert [a.name for a in fields(C)] == list(d)
 
 
 class TestConverter:
@@ -1246,19 +1322,14 @@ class TestConverter:
         """
         C = make_class(
             "C",
-            dict(
-                [
-                    ("y", attr.ib()),
-                    (
-                        "x",
-                        attr.ib(
-                            init=init,
-                            default=Factory(lambda: val),
-                            converter=lambda v: v + 1,
-                        ),
-                    ),
-                ]
-            ),
+            {
+                "y": attr.ib(),
+                "x": attr.ib(
+                    init=init,
+                    default=Factory(lambda: val),
+                    converter=lambda v: v + 1,
+                ),
+            },
         )
         c = C(2)
 
@@ -2056,7 +2127,7 @@ class BareSlottedC:
 
 
 class TestAutoDetect:
-    @pytest.mark.parametrize("C", (BareC, BareSlottedC))
+    @pytest.mark.parametrize("C", [BareC, BareSlottedC])
     def test_determine_detects_non_presence_correctly(self, C):
         """
         On an empty class, nothing should be detected.
@@ -2287,7 +2358,7 @@ class TestAutoDetect:
         assert C(1) == C(1)
 
     @pytest.mark.parametrize(
-        "eq,order,cmp",
+        ("eq", "order", "cmp"),
         [
             (True, None, None),
             (True, True, None),

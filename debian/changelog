@@ -1,3 +1,30 @@
+python-attrs (23.2.0-2) unstable; urgency=medium
+
+  * Fix FTBFS with pytest 8 (Closes: #1064949)
+
+ -- Timo Röhling <roehling@debian.org>  Thu, 29 Feb 2024 22:44:40 +0100
+
+python-attrs (23.2.0-1) unstable; urgency=medium
+
+  * New upstream version 23.2.0
+
+ -- Timo Röhling <roehling@debian.org>  Tue, 02 Jan 2024 20:39:25 +0100
+
+python-attrs (23.1.0-2) unstable; urgency=medium
+
+  [ Bastian Germann ]
+  * Remove retired uploader
+
+  [ Timo Röhling ]
+  * Add myself as new uploader (Closes: #1041172)
+  * Update patches
+    - Mark Debian-specific patches as Forwarded: not-needed
+    - Drop Sphinx theme patch, furo theme is available in Debian now
+  * New Build-Depends on furo theme package
+  * Add nocheck/nodoc support
+
+ -- Timo Röhling <roehling@debian.org>  Wed, 26 Jul 2023 15:58:31 +0200
+
 python-attrs (23.1.0-1) unstable; urgency=medium
 
   * Team upload.

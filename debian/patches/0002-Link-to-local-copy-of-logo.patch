@@ -2,15 +2,16 @@ From: =?utf-8?q?Timo_R=C3=B6hling?= <roehling@debian.org>
 Date: Fri, 23 Dec 2022 22:13:44 +0100
 Subject: Link to local copy of logo
 
+Forwarded: not-needed
 ---
  CHANGELOG.md | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index fecbf56..daabcfe 100644
+index a768197..3a3306b 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -903,7 +903,7 @@ To encourage more participation, the project has also been moved into a [dedicat
+@@ -917,7 +917,7 @@ To encourage more participation, the project has also been moved into a [dedicat
  
  `attrs` also has a logo now!
  

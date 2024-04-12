@@ -2,23 +2,25 @@ Source: python-attrs
 Section: python
 Priority: optional
 Maintainer: Debian Python Team <team+python@tracker.debian.org>
+Uploaders: Timo Röhling <roehling@debian.org>
 Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
  dh-sequence-python3,
- dh-sequence-sphinxdoc,
+ dh-sequence-sphinxdoc <!nodoc>,
+ furo <!nodoc>,
  pybuild-plugin-pyproject,
  python3-all,
  python3-doc,
  python3-hatchling,
  python3-hatch-fancy-pypi-readme,
  python3-hatch-vcs,
- python3-hypothesis,
- python3-myst-parser,
- python3-pytest,
- python3-sphinx,
- python3-sphinx-rtd-theme,
- python3-zope.interface,
+ python3-hypothesis <!nocheck>,
+ python3-myst-parser <!nodoc>,
+ python3-pytest <!nocheck>,
+ python3-sphinx <!nodoc>,
+ python3-sphinx-rtd-theme <!nodoc>,
+ python3-zope.interface <!nodoc>,
 Standards-Version: 4.6.2
 Testsuite: autopkgtest-pkg-pybuild
 Homepage: https://attrs.readthedocs.org/

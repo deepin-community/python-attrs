@@ -1,0 +1,24 @@
+From: Denis Laxalde <denis@laxalde.org>
+Date: Thu, 29 Feb 2024 22:44:26 +0100
+Subject: Remove pytest.deprecated_call() in TestAssoc::test_unknown
+
+Forwarded: https://github.com/python-attrs/attrs/pull/1249
+---
+ tests/test_funcs.py | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/tests/test_funcs.py b/tests/test_funcs.py
+index 044aaab..398ba35 100644
+--- a/tests/test_funcs.py
++++ b/tests/test_funcs.py
+@@ -600,9 +600,7 @@ class TestAssoc:
+         AttrsAttributeNotFoundError.
+         """
+         # No generated class will have a four letter attribute.
+-        with pytest.raises(
+-            AttrsAttributeNotFoundError
+-        ) as e, pytest.deprecated_call():
++        with pytest.raises(AttrsAttributeNotFoundError) as e:
+             assoc(C(), aaaa=2)
+ 
+         assert (f"aaaa is not an attrs attribute on {C!r}.",) == e.value.args
