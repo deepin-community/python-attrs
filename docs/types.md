@@ -1,6 +1,6 @@
 # Type Annotations
 
-*attrs* comes with first class support for type annotations for both Python 3.6 ({pep}`526`) and legacy syntax.
+*attrs* comes with first-class support for type annotations for both {pep}`526` and legacy syntax.
 
 However they will forever remain *optional*, therefore the example from the README could also be written as:
 
@@ -19,7 +19,18 @@ SomeClass(a_number=1, list_of_numbers=[1, 2, 3])
 
 You can choose freely between the approaches, but please remember that if you choose to use type annotations, you **must** annotate **all** attributes!
 
----
+:::{caution}
+If you define a class with a {func}`attrs.field` that **lacks** a type annotation, *attrs* will **ignore** other fields that have a type annotation, but are not defined using {func}`attrs.field`:
+
+```{doctest}
+>>> @define
+... class SomeClass:
+...     a_number = field(default=42)
+...     another_number: int = 23
+>>> SomeClass()
+SomeClass(a_number=42)
+```
+:::
 
 Even when going all-in on type annotations, you will need {func}`attrs.field` for some advanced features though.
 
@@ -88,9 +99,6 @@ class SomeClass:
 
 :::{warning}
 The *Pyright* inferred types are a tiny subset of those supported by *Mypy*, including:
-
-- The generated `__init__` signature only includes the attribute type annotations.
-  It currently does not include attribute `converter` types.
 
 - The `attrs.frozen` decorator is not typed with frozen attributes, which are properly typed via `attrs.define(frozen=True)`.
 

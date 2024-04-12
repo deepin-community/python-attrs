@@ -96,6 +96,7 @@ This can be used to override private attribute handling, or make other arbitrary
 <Signature (self, _x: int, distasteful_y: int) -> None>
 ```
 
+(defaults)=
 
 ## Defaults
 
@@ -306,6 +307,9 @@ This can be useful for doing type-conversions on values that you don't want to f
 >>> o = C("1")
 >>> o.x
 1
+>>> o.x = "2"
+>>> o.x
+2
 ```
 
 Converters are run *before* validators, so you can use validators to check the final form of the value.
@@ -357,7 +361,8 @@ However, sometimes you need to do that one quick thing before or after your clas
 For that purpose, *attrs* offers the following options:
 
 - `__attrs_pre_init__` is automatically detected and run *before* *attrs* starts initializing.
-  This is useful if you need to inject a call to `super().__init__()`.
+  If `__attrs_pre_init__` takes more than the `self` argument, the *attrs*-generated `__init__` will call it with the same arguments it received itself.
+  This is useful if you need to inject a call to `super().__init__()` -- with or without arguments.
 
 - `__attrs_post_init__` is automatically detected and run *after* *attrs* is done initializing your instance.
   This is useful if you want to derive some attribute from others or perform some kind of validation over the whole instance.

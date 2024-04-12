@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
+
 import json
-import os.path
 import shutil
 import subprocess
-import sys
+
+from pathlib import Path
 
 import pytest
 
@@ -12,9 +14,6 @@ import attrs
 
 
 pytestmark = [
-    pytest.mark.skipif(
-        sys.version_info < (3, 7), reason="Requires Python 3.7+."
-    ),
     pytest.mark.skipif(
         shutil.which("pyright") is None, reason="Requires pyright."
     ),
@@ -27,8 +26,8 @@ class PyrightDiagnostic:
     message: str
 
 
-def parse_pyright_output(test_file):
-    pyright = subprocess.run(
+def parse_pyright_output(test_file: Path) -> set[PyrightDiagnostic]:
+    pyright = subprocess.run(  # noqa: PLW1510
         ["pyright", "--outputjson", str(test_file)], capture_output=True
     )
 
@@ -42,15 +41,15 @@ def parse_pyright_output(test_file):
 
 def test_pyright_baseline():
     """
-    The __dataclass_transform__ decorator allows pyright to determine attrs
-    decorated class types.
+    The typing.dataclass_transform decorator allows pyright to determine
+    attrs decorated class types.
     """
 
-    test_file = os.path.dirname(__file__) + "/dataclass_transform_example.py"
+    test_file = Path(__file__).parent / "dataclass_transform_example.py"
 
     diagnostics = parse_pyright_output(test_file)
 
-    # Expected diagnostics as per pyright 1.1.135
+    # Expected diagnostics as per pyright 1.1.311
     expected_diagnostics = {
         PyrightDiagnostic(
             severity="information",
@@ -60,12 +59,13 @@ def test_pyright_baseline():
         PyrightDiagnostic(
             severity="information",
             message='Type of "DefineConverter.__init__" is '
-            '"(self: DefineConverter, with_converter: int) -> None"',
+            '"(self: DefineConverter, with_converter: str | Buffer | '
+            'SupportsInt | SupportsIndex | SupportsTrunc) -> None"',
         ),
         PyrightDiagnostic(
             severity="error",
             message='Cannot assign member "a" for type '
-            '"Frozen"\n\xa0\xa0"Frozen" is frozen',
+            '"Frozen"\n\xa0\xa0"Frozen" is frozen\n\xa0\xa0\xa0\xa0Member "__set__" is unknown',
         ),
         PyrightDiagnostic(
             severity="information",
@@ -74,7 +74,8 @@ def test_pyright_baseline():
         PyrightDiagnostic(
             severity="error",
             message='Cannot assign member "a" for type '
-            '"FrozenDefine"\n\xa0\xa0"FrozenDefine" is frozen',
+            '"FrozenDefine"\n\xa0\xa0"FrozenDefine" is frozen\n\xa0\xa0\xa0\xa0'
+            'Member "__set__" is unknown',
         ),
         PyrightDiagnostic(
             severity="information",
@@ -111,7 +112,7 @@ reveal_type(attrs.AttrsInstance)
     expected_diagnostics = {
         PyrightDiagnostic(
             severity="information",
-            message='Type of "attrs.AttrsInstance" is "Type[AttrsInstance]"',
+            message='Type of "attrs.AttrsInstance" is "type[AttrsInstance]"',
         ),
     }
     assert diagnostics == expected_diagnostics

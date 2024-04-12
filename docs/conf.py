@@ -70,8 +70,11 @@ copyright = f"2015, {author}"
 
 # The full version, including alpha/beta/rc tags.
 release = metadata.version("attrs")
-# The short X.Y version.
-version = release.rsplit(".", 1)[0]
+if "dev" in release:
+    release = version = "UNRELEASED"
+else:
+    # The short X.Y version.
+    version = release.rsplit(".", 1)[0]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -94,7 +97,14 @@ html_theme_options = {
     "sidebar_hide_name": True,
     "light_logo": "attrs_logo.svg",
     "dark_logo": "attrs_logo_white.svg",
+    "top_of_page_button": None,
+    "light_css_variables": {
+        "font-stack": "Inter,sans-serif",
+        "font-stack--monospace": "BerkeleyMono, MonoLisa, ui-monospace, "
+        "SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace",
+    },
 }
+html_css_files = ["custom.css"]
 
 
 # The name of an image file (within the static path) to use as favicon of the
@@ -159,9 +169,7 @@ texinfo_documents = [
 
 epub_description = "Python Clases Without Boilerplate"
 
-intersphinx_mapping = {
-    "https://docs.python.org/3": None,
-}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # Allow non-local URIs so we can have images in CHANGELOG etc.
 suppress_warnings = ["image.nonlocal_uri"]
